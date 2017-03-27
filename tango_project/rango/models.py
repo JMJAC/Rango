@@ -5,7 +5,7 @@ from django.template.defaultfilters import slugify
 class Category(models.Model):
     name = models.CharField(max_length=128, unique=True)
     likes = models.IntegerField(default=0)
-    views = models.PositiveIntegerField(default=0)
+    views = models.IntegerField(default=0)
     slug = models.SlugField(unique=True)
 
     class Meta:
@@ -22,7 +22,7 @@ class Category(models.Model):
 class Page(models.Model):
     category = models.ForeignKey(Category)
     title = models.CharField(max_length=128)
-    url = models.URLField()
+    url = models.URLField(max_length=256)
     views = models.IntegerField(default=0)
 
     def __str__(self):
