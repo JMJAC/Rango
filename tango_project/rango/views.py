@@ -33,7 +33,7 @@ def add_category(request):
         if form.is_valid():
             # if the form is valid commit and direct user to index
             form.save(commit=True)
-            return redirect(index)
+            return index(request)
         else:
             print(form.errors)
     return render(request, 'rango/add_category.html', {'form': form})
@@ -53,7 +53,7 @@ def add_page(request, category_name_slug):
                 page = form.save(commit=False)
                 page.category = category
                 page.save()
-                return redirect(show_category, category_name_slug)
+                return show_category(request, category_name_slug)
         else:
             print(form.errors)
     return render(request, 'rango/add_page.html', {'form': form, 'category': category})
