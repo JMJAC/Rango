@@ -3,10 +3,33 @@ from rango.models import Category, Page
 from rango.forms import CategoryForm, PageForm, UserForm, UserProfileForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from datetime import datetime
+
+
+# A Helper method
+def visitor_cookie_handler(request):
+    visits = int(get_server_side_cookies(request, 'visits', '1'))
+    last_visit_cookie = get_server_side_cookies(request, 'last_visit', str(datetime.now()))
+    last_visit_time = datetime.strptime(last_visit_cookie[:-7], '%Y-%m-%d %H:%M:%S')
+    if (datetime.now() - last_visit_time).days > 0:
+        visits += 1
+        request.session['last_visit'] = str(datetime.now())
+    else:
+        request.session['last_visit'] = last_visit_cookie
+    request.session['visits'] = visits
+
+
+# A Helper method
+def get_server_side_cookies(request, cookie, default_val=None):
+    val = request.session.get(cookie)
+    if not val:
+        val = default_val
+    return val
 
 
 def index(request):
-    context_dict = {'categories': Category.objects.order_by('-likes')[:5], 'pages': Page.objects.order_by('-views')[:5]}
+    visitor_cookie_handler(request)
+    context_dict = {'categories': Category.objects.order_by('-likes')[:5], 'pages': Page.objects.order_by('-views')[:5], 'visits': request.session['visits']}
     return render(request, 'rango/index.html', context_dict)
 
 
@@ -82,7 +105,7 @@ def register(request):
     else:
         user_form = UserForm()
         profile_form = UserProfileForm()
-    return render(request, 'rango/register.html', {'user_form': user_form, 'profile_form': profile_form, 'registered': registered})
+    return render(request, 'registration/register.html', {'user_form': user_form, 'profile_form': profile_form, 'registered': registered})
 
 
 def user_login(request):
@@ -100,7 +123,7 @@ def user_login(request):
             print(f'Invalid login details {username}, {password}')
             return render(request, 'rango/login.html', {'error': 'Invalid login details'})
     else:
-        return render(request, 'rango/login.html', {})
+        return render(request, 'registration/login.html', {})
 
 
 @login_required
