@@ -35,11 +35,27 @@ class PageForm(forms.ModelForm):
 
 
 class UserForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput())
+    password1 = forms.CharField(widget=forms.PasswordInput())
+    password2 = forms.CharField(widget=forms.PasswordInput())
+
+    def __init__(self, *args, **kwargs):
+        super(UserForm, self).__init__(*args, **kwargs)
+        self.fields['email'].required = True
+        self.fields['password1'].label = 'Password'
+        self.fields['password2'].label = 'Confirm password'
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'password')
+        fields = ('username', 'email', 'password1', 'password2')
+
+    def clean(self):
+        password1 = self.cleaned_data.get('password1')
+        password2 = self.cleaned_data.get('password2')
+
+        if password1 and password1 != password2:
+            raise forms.ValidationError("Passwords don't match")
+
+        return self.cleaned_data
 
 
 class UserProfileForm(forms.ModelForm):
