@@ -105,7 +105,7 @@ def register(request):
     else:
         user_form = UserForm()
         profile_form = UserProfileForm()
-    return render(request, 'registration/register.html', {'user_form': user_form, 'profile_form': profile_form, 'registered': registered})
+    return render(request, 'rango/register.html', {'user_form': user_form, 'profile_form': profile_form, 'registered': registered})
 
 
 def user_login(request):
@@ -123,7 +123,7 @@ def user_login(request):
             print(f'Invalid login details {username}, {password}')
             return render(request, 'rango/login.html', {'error': 'Invalid login details'})
     else:
-        return render(request, 'registration/login.html', {})
+        return render(request, 'rango/login.html', {})
 
 
 @login_required

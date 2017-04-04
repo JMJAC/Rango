@@ -1,21 +1,14 @@
 {% extends 'rango/base.html' %}
-{% load staticfiles %}
-
-{% block title_block %}
-    Login
-{% endblock %}
-
 {% block body_block %}
-    <h1>Login to rango</h1>
-    <form id="login_form" method="POST" action="{% url 'rango:login' %}">
+    <h1>Login</h1>
+    <form method="POST" action=".">
         {% csrf_token %}
-        Username: <input type="text" name="username" value="" size="50"/>
-        <br />
-        Password: <input type="password" name="password" value="" size="50"/>
-        <br />
-        {% if error %}
-            {{error}}<br />
-        {% endif %}
-        <input type="submit" value="submit" />
+        {{form.as_p}}
+        <input type="submit" value="Log in"/>
+        <input type="hidden" name="next" value="{{ next }}"/>
     </form>
+    <p>
+        Not a member?
+        <a href="{% url 'registration_register' %}">Register!</a>
+    </p>
 {% endblock %}
