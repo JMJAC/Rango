@@ -38,7 +38,8 @@ PREREQ_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'registration'
+    'registration',
+    'bootstrap3'
 ]
 
 PROJECT_APPS = [

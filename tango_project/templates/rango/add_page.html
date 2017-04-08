@@ -1,22 +1,23 @@
 {% extends 'rango/base.html' %}
-{% load staticfiles %}
+{% load bootstrap3 %}
 
 {% block title_block %}
     Add New Page
 {% endblock %}
 
 {% block body_block %}
-    <h1>Add Page to {{category.name}}</h1>
-    <form id="page_form" method="POST" action="{% url 'rango:add_page' category.slug %}">
+{% if category %}
+    <h1 class="form-signin-display">Add Page to {{category.name}}</h1>
+    <form role="form" id="page_form" method="POST" action="{% url 'rango:add_page' category.slug %}">
         {% csrf_token %}
-        {% for hidden in form.hidden_fields %}
-            {{hidden}}
-        {% endfor %}
-        {% for field in form.visible_fields %}
-            {{field.errors}}
-            {{field.help_text}}
-            {{field}}<br />
-        {% endfor %}
-        <input type="submit" name="submit" value="Create Page" />
+        {% bootstrap_form form layout='inline'%}
+        {% buttons %}
+        <button class="btn btn-primary" type="submit" name="submit">
+            Add Page
+        </button>
+        {% endbuttons %}
     </form>
+{% else %}
+    <p>This category does not exist.</p>
+{% endif %}
 {% endblock %}

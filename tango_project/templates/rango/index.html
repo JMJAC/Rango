@@ -6,31 +6,39 @@
 {% endblock %}
 
 {% block body_block %}
+<div class="jumbotron">
     {% if user.is_authenticated %}
-        <h1>Hi {{user.username}}!</h1>
+        <h1 class="display-3">Hi {{user.username}}!</h1>
     {% else %}
-        <h1>Hi there!</h1>
+        <h1 class="display-3">Hi there!</h1>
     {% endif %}
         <h3>You've visited us {{visits}} times</h3>
+</div>
+<div class="row marketing">
+        <div class="col-lg-6">
         {% if categories %}
-        <h1>Most Liked Categories</h1>
-        <ul>
+            <h1>Most Liked Categories</h1>
+            <ul class="list-group">
             {% for category in categories %}
-                <li><a href="{% url 'rango:show_category' category.slug %}">{{category.name}}</a> </li>
+                <li class="list-group"><a href="{% url 'rango:show_category' category.slug %}">{{category.name}}</a> </li>
             {% endfor %}
-        </ul>
+            </ul>
         {% else %}
             <strong>There are no categories</strong>
         {% endif %}
+        </div>
+        <div class="col-lg'6">
         {% if pages %}
-        <h1>Most Viewed Pages</h1>
-        <ul>
+            <h1>Most Viewed Pages</h1>
+            <ul class="list-group">
             {% for page in pages %}
-                <li><a href="{{page.url}}">{{page.title}}</a> </li>
-            {% endfor %}
-        </ul>
+                <li class="list-group"><a href="{{page.url}}">{{page.title}}</a> </li>
+                {% endfor %}
+            </ul>
         {% else %}
-            <strong>There are no pages</strong>
+                <strong>There are no pages</strong>
         {% endif %}
-        <img src= "{% static 'images/mops.jpg' %}" alt="Mops"s>
+        </div>
+</div>
+<img src= "{% static 'images/mops.jpg' %}" alt="Mops"s>
 {% endblock %}
