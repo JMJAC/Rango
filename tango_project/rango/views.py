@@ -1,9 +1,10 @@
-from django.shortcuts import render, HttpResponseRedirect, HttpResponse, reverse
-from rango.models import Category, Page
+from django.shortcuts import render, HttpResponseRedirect, HttpResponse, reverse, redirect
+from rango.models import Category, Page, User, UserProfile
 from rango.forms import CategoryForm, PageForm, UserForm, UserProfileForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from datetime import datetime
+from rango.webhose_search import run_query
 
 
 # A Helper method
@@ -39,15 +40,21 @@ def about(request):
 
 
 def show_category(request, category_name_slug):
-    context_dict = {}
+    context_dict = {'result_list': []}
     try:
         category = Category.objects.get(slug=category_name_slug)
-        pages = Page.objects.filter(category=category)
+        pages = Page.objects.filter(category=category).order_by('-views')
         context_dict['category'] = category
         context_dict['pages'] = pages
     except Category.DoesNotExist:
         context_dict['category'] = None
         context_dict['pages'] = None
+    # Search functionality
+    if request.method == 'POST':
+        query = request.POST['query'].strip()
+        if query:
+            context_dict['result_list'] = run_query(query)
+
     return render(request, 'rango/category.html', context_dict)
 
 
@@ -80,7 +87,7 @@ def add_page(request, category_name_slug):
                 page = form.save(commit=False)
                 page.category = category
                 page.save()
-                return show_category(request, category_name_slug)
+                return redirect(reverse('rango:show_category', kwargs={'category_name_slug': category_name_slug}))
         else:
             print(form.errors)
     return render(request, 'rango/add_page.html', {'form': form, 'category': category})
@@ -138,3 +145,67 @@ def restricted(request):
 def user_logout(request):
     logout(request)
     return HttpResponseRedirect(reverse('index'))
+
+
+def search(request):
+    result_list = []
+    if request.method == 'POST':
+        query = request.POST['query'].strip()
+        if query:
+            result_list = run_query(query)
+    return render(request, 'rango/search.html', {'result_list': result_list})
+
+
+def track_url(request):
+    page_id = None
+    if request.method == 'GET':
+        if 'page_id' in request.GET:
+            page_id = request.GET['page_id']
+    if page_id:
+        try:
+            page = Page.objects.get(id=page_id)
+            page.views += 1
+            page.save()
+            return redirect(page.url)
+        except Exception as e:
+            return HttpResponse(f'Page id {page_id} not found. Error code: {e}')
+    print('No page id in get string')
+    return redirect(reverse('index'))
+
+
+@login_required
+def register_profile(request):
+    form = UserProfileForm
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, request.FILES)
+        if form.is_valid():
+            user_profie = form.save(commit=False)
+            user_profie.user = request.user
+            user_profie.save()
+            picture = form.picture
+
+            return redirect(reverse('index'))
+        else:
+            print(form.errors)
+
+    return render(request, 'registration/profile_registration.html', {'form': form})
+
+
+def profile(request, username):
+    try:
+        user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        return redirect(reverse('index'))
+
+    userprofile = UserProfile.objects.get_or_create(user=user)[0]
+    form = UserProfileForm({'website': userprofile.website, 'picture': userprofile.picture})
+
+    if user.username == userprofile.user.username:
+        if request.method == "POST":
+            form = UserProfileForm(request.POST, request.FILES, instance=userprofile)
+            if form.is_valid():
+                form.save(commit=True)
+                return redirect(reverse('rango:profile', kwargs={'username': user.username}))
+            else:
+                print(form.errors)
+    return render(request, 'rango/profile.html', {'userprofile': userprofile, 'selecteduser': user, 'form': form})

@@ -6,12 +6,18 @@
 {% endblock %}
 
 {% block body_block %}
+<div>
     {% if category %}
         <h1>{{category.name}}</h1>
         {% if pages %}
             <ul>
              {% for page in pages %}
-                <li><a href="{{page.url}}">{{page.title}}</a></li>
+                <li><a href="{% url 'rango:goto' %}?page_id={{page.id}}">{{page.title}}</a><span class="tag tag-pill tag-primary">
+                    {% if page.views > 1 %}
+                        {{page.views}} views</span></li>
+                    {% else %}
+                        {{page.views}} view</span></li>
+                    {% endif %}
              {% endfor %}
             </ul>
         {% else %}
@@ -23,4 +29,33 @@
     {% else %}
         The specified category does not exist!
     {% endif %}
+    {% if user.is_authenticated %}
+    <div>
+    <br />
+    <h1>Search!</h1>
+    <br />
+    <form class="form-inline" id="user_form" method="POST" action="{% url 'rango:show_category' category.slug %}">
+        {% csrf_token %}
+        <div class="form-group">
+            <input class="form-control" type="text" size="50" name="query" value="" id="query" />
+        </div>
+        <button class="btn btn-primary" type="submit" name="submit" value="Search">Search</button>
+    </form>
+
+    <div>
+        {% if result_list %}
+        <h3>Results</h3>
+        <div class="list-group">
+            {% for result in result_list %}
+                <div class="list-group-item">
+                    <h4 class="list-group-item-heading"><a href="{{ result.link }}">{{result.title}}</a></h4>
+                    <p class="list-group-item-text">{{result.summary}}</p>
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    </div>
+    {% endif %}
+</div>
 {% endblock %}

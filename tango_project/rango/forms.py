@@ -23,12 +23,12 @@ class PageForm(forms.ModelForm):
     class Meta:
         # An association between the ModelForm and model
         model = Page
-        fields = ('title', 'url')
+        fields = ('title', 'url', 'views')
 
     def clean(self):
         cleaned_data = self.cleaned_data
         url = cleaned_data.get('url')
-        if url and not url.startswith('http://'):
+        if url and not(url.startswith('http://') or url.startswith('https://')):
             url = 'http://' + url
             cleaned_data['url'] = url
         return cleaned_data
@@ -59,6 +59,9 @@ class UserForm(forms.ModelForm):
 
 
 class UserProfileForm(forms.ModelForm):
+    website = forms.URLField(required=False)
+    picture = forms.ImageField(required=False)
+
     class Meta:
         model = UserProfile
         fields = ('website', 'picture')
