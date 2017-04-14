@@ -10,18 +10,17 @@
          width="300"
          height="300"
          alt="{{selecteduser.username}}"/>
-    <hr />
     <p><strong>Website:</strong><a href="{{userprofile.website}}"> {{userprofile.website}}</a></p>
     <br />
     <div>
         {% if selecteduser.username == user.username %}
+        <hr />
+        <h2>Edit:</h2>
             <form method="POST" action="." enctype="multipart/form-data">
                 {% csrf_token %}
                 {{form.as_p}}
                 <button class="btn btn-primary" type="submit" value="Update">Update</button>
             </form>
-        {% else %}
-            <p><strong>Website:</strong><a href="{{userprofile.website}}"> {{userprofile.website}}</a></p>
         {% endif %}
     </div>
 <div id="edit_profile"></div>
